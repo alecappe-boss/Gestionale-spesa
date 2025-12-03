@@ -1,6 +1,9 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -227,10 +230,13 @@ public class gestionale_spesa {
                 }
 
             } else if (scelta == 7) {
-                
+
                 try {
                     StringBuilder csv = new StringBuilder();
-                    csv.append("Nome,Prezzo,Quantita,Categoria,Acquistato\n");
+                    
+                    if (!Files.exists(Paths.get("spesa.csv")) || Files.size(Paths.get("spesa.csv")) == 0) {
+                        csv.append("Nome,Prezzo,Quantita,Categoria,Acquistato\n");
+                    }
 
                     for (Articolo a : listaArticoli.values()) {
                         csv.append(a.nome).append(",");
@@ -240,14 +246,35 @@ public class gestionale_spesa {
                         csv.append(a.acquistato).append("\n");
                     }
 
-                    Files.writeString(Paths.get("spesa.csv"), csv.toString());
-                    System.out.println("Lista salvata su spesa.csv");
+                    Files.writeString(Paths.get("spesa.csv"), csv.toString(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                    System.out.println("Lista salvata in spesa.csv");
+                    System.out.println("(" + listaArticoli.size() + " articoli salvati)");
                 } catch (Exception e) {
                     System.out.println("Errore durante il salvataggio: " + e.getMessage());
                 } 
 
             } else if (scelta == 8) {
-                System.out.println();
+                
+                try {
+                    List<String> linee = Files.readAllLines(Paths.get("carica.csv"));
+
+                    for (int i = 1; i < linee.size(); i++) {  // Salta header
+                        String linea = linee.get(i);
+                        String[] campi = linea.split(",");
+
+                        String nome = campi[0];
+                        double prezzo = Double.parseDouble(campi[1]);
+                        int quantita = Integer.parseInt(campi[2]);
+                        String categoria = campi[3];
+                        boolean acquistato = Boolean.parseBoolean(campi[4]);
+
+                        Articolo a = new Articolo(nome, prezzo, quantita, categoria, acquistato);
+                        listaArticoli.put(nome, a);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Errore durante il caricamento: " + e.getMessage());
+                }
+
             } else if (scelta == 9) {
                 break;
             } else {
