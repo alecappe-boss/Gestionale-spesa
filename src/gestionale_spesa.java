@@ -1,11 +1,13 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class gestionale_spesa {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        List<Articolo> listaArticoli = new ArrayList<>();
+        Map<String, Articolo> listaArticoli = new LinkedHashMap<>();
         
         while (true) {
             
@@ -49,52 +51,201 @@ public class gestionale_spesa {
                 boolean acquistato = false;
 
                 Articolo articolo = new Articolo(nome, prezzo, quantita, categoria, acquistato);
-                listaArticoli.add(articolo);
+                listaArticoli.put(nome, articolo);
 
                 System.out.println("\nArticolo aggiunto con successo!");
 
             } else if (scelta == 2) {
 
-                System.out.println("\nLISTA DELLA SPESA");
+                System.out.println("\n═══════════════════════════════════════");
+                System.out.println("          LISTA DELLA SPESA");
+                System.out.println("═══════════════════════════════════════\n");
 
-                if (listaArticoli.size()>0) {
-                    int nonComprato = 0;
-                    int comprato = 0;
-                    double prezzoTotale = 0;
+                if (!listaArticoli.isEmpty()) {
+
+                    int comprati = 0;
+                    double totale = 0;
                     int numero = 1;
 
-                    for (Articolo a : listaArticoli) {
-                        System.out.println("\n" + numero + ". Nome: " + a.nome + ", prezzo: " + a.prezzo + ", quantita: " + a.quantita + ", categoria: " + a.categoria + ", acquistato: " + a.acquistato);
-                        if (a.acquistato==true) {
-                            comprato++;
+                    for (String nome : listaArticoli.keySet()) {
+                        
+                        Articolo a = listaArticoli.get(nome);
+                        
+                        String check;
+                        if (a.acquistato) {
+                            check = "[X]";
+                        } else {
+                            check = "[ ]";
                         }
 
-                        numero++;
+                        double subtotale = a.prezzo * a.quantita;
 
-                        prezzoTotale += a.prezzo * a.quantita;
+                        System.out.printf("%s %d. %s - %s\n", check, numero, a.nome, a.categoria);
+                        System.out.printf("       €%.2f x %d = €%.2f\n\n", a.prezzo, a.quantita, subtotale);
+
+                        if (a.acquistato) comprati++;
+
+                        totale += subtotale;
+                        numero++;
                     }
 
-                    nonComprato = listaArticoli.size() - comprato;
+                    int nonComprati = listaArticoli.size() - comprati;
 
-                    System.out.println("\nTotale: " + listaArticoli.size());
-                    System.out.println("Non acquistati: " + nonComprato);
-                    System.out.println("Acquistati: " + comprato);
-                    System.out.printf("Spesa totale: €%.2f\n", prezzoTotale);
+                    System.out.println("═══════════════════════════════════════");
+                    System.out.println("Totale: " + listaArticoli.size() + " articoli");
+                    System.out.println("Non acquistati: " + nonComprati);
+                    System.out.println("Acquistati: " + comprati);
+                    System.out.printf("Spesa totale: €%.2f\n", totale);
+                    System.out.println("═══════════════════════════════════════");
 
                 } else {
-                    System.out.println("\nLa lista è vuota!");
+                    System.out.println("La lista è vuota!");
+                    System.out.println("═══════════════════════════════════════");
                 }
 
             } else if (scelta == 3) {
-                System.out.println();
+
+                System.out.print("Quale articolo rimuovere? (numero)");
+                int opzione = input.nextInt();
+                input.nextLine();
+                int numero = 1;
+                boolean trovato = false;
+                String nomeArticolo = null;
+                
+                for (String nome : listaArticoli.keySet()) {
+                    if (opzione == numero) {
+                        listaArticoli.remove(nome);
+                        nomeArticolo = nome;
+                        trovato = true;
+                        break;
+                    }
+                    numero ++;
+                 }
+
+                 if (trovato) {
+                    System.out.println(nomeArticolo + " rimosso dalla lista");
+                 } else {
+                    System.out.println("L'elemento indicato non è presente nella lista");
+                 }
+
             } else if (scelta == 4) {
-                System.out.println();
+                
+                System.out.print("Cosa cerchi? ");
+                String nomeCercato = input.nextLine();
+                boolean trovato = false;
+                
+                for (String nome : listaArticoli.keySet()) {
+                    
+                    if (nome.equals(nomeCercato)) {
+                        Articolo a = listaArticoli.get(nome);
+                        double subtotale = a.prezzo * a.quantita;
+                        System.out.println("Trovato!");
+                        if (a.acquistato == false) {
+                            System.out.println(a.nome + " - " + a.categoria + " - €" + a.prezzo + " * " + a.quantita + " = " + subtotale + " [Non acquistato]");
+                        } else {
+                            System.out.println(a.nome + " - " + a.categoria + " - €" + a.prezzo + " * " + a.quantita + " = " + subtotale + " [Acquistato]") ;
+                        }
+                        trovato = true;
+                        break;
+                    }
+                }
+
+                if (!trovato) {
+                    System.out.println("L'articolo cercato non è presente nella lista");
+                }
+
             } else if (scelta == 5) {
-                System.out.println();
+                
+                System.out.print("Quale articolo hai acquistato? (numero): ");
+                int opzione = input.nextInt();
+                input.nextLine();
+                int numero = 1;
+                boolean trovato = false;
+                String nomeArticolo = null;
+                
+                for (String nome : listaArticoli.keySet()) {
+                    if (opzione == numero) {
+                        Articolo a = listaArticoli.get(nome);
+                        a.acquistato = true;
+                        nomeArticolo = nome;
+                        trovato = true;
+                        break;
+                    }
+                    numero ++;
+                 }
+
+                if (trovato) {
+                    System.out.println(nomeArticolo + " segnato come acquistato");
+                } else {
+                    System.out.println("L'elemento indicato non è presente nella lista");
+                }
+
             } else if (scelta == 6) {
-                System.out.println();
+                
+                System.out.println("CALCOLO SPESA TOTALE");
+                
+                if (!listaArticoli.isEmpty()) {
+
+                    int comprati = 0;
+                    double totale = 0;
+                    int numero = 1;
+                    double spesaAcquisiti = 0;
+                    double spesaRimanente = 0;
+
+                    for (String nome : listaArticoli.keySet()) {
+                        
+                        Articolo a = listaArticoli.get(nome);
+
+                        double subtotale = a.prezzo * a.quantita;
+
+                        if (a.acquistato) {
+                            comprati++;
+                            spesaAcquisiti += subtotale; 
+                        } else {
+                            spesaRimanente += subtotale;
+                        }
+
+                        totale += subtotale;
+                        numero++;
+                    }
+
+                    int nonComprati = listaArticoli.size() - comprati;
+
+                    System.out.println("═══════════════════════════════════════");
+                    System.out.println("Articoli totali: " + listaArticoli.size());
+                    System.out.println("Non acquistati: " + nonComprati);
+                    System.out.println("Acquistati: " + comprati);
+                    System.out.println("═══════════════════════════════════════");
+                    System.out.printf("Spesa totale: €%.2f\n", totale);
+                    System.out.printf("Spesa acquisiti: €%.2f\n", spesaAcquisiti);
+                    System.out.printf("Spesa rimanente: €%.2f\n", spesaRimanente);
+                    System.out.println("═══════════════════════════════════════");
+
+                } else {
+                    System.out.println("La lista è vuota!");
+                    System.out.println("═══════════════════════════════════════");
+                }
+
             } else if (scelta == 7) {
-                System.out.println();
+                
+                try {
+                    StringBuilder csv = new StringBuilder();
+                    csv.append("Nome,Prezzo,Quantita,Categoria,Acquistato\n");
+
+                    for (Articolo a : listaArticoli.values()) {
+                        csv.append(a.nome).append(",");
+                        csv.append(a.prezzo).append(",");
+                        csv.append(a.quantita).append(",");
+                        csv.append(a.categoria).append(",");
+                        csv.append(a.acquistato).append("\n");
+                    }
+
+                    Files.writeString(Paths.get("spesa.csv"), csv.toString());
+                    System.out.println("Lista salvata su spesa.csv");
+                } catch (Exception e) {
+                    System.out.println("Errore durante il salvataggio: " + e.getMessage());
+                } 
+
             } else if (scelta == 8) {
                 System.out.println();
             } else if (scelta == 9) {
