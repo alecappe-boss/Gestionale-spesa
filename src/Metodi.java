@@ -222,4 +222,21 @@ public class Metodi {
         sb.append(String.format("       €%.2f x %d = €%.2f\n\n", a.prezzo, a.quantita, subtotale));
         return sb.toString();
     }
+
+    public static double leggiNumPositivo(Scanner input, String messaggio) {
+        double valore = -1;
+        do {
+            try {
+                System.out.print(messaggio);
+                valore = input.nextDouble();
+                input.nextLine();
+                if (valore <= 0) System.out.println("Il numero deve essere > 0!");
+            } catch (Exception e) {
+                System.out.println("Devi inserire un numero!");
+                input.nextLine();
+            }
+        } while (valore <= 0);
+        return valore;
+    }
+
 }

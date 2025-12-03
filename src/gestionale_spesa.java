@@ -27,18 +27,10 @@ public class gestionale_spesa {
                     String nome = input.nextLine();
 
                     // Legge il prezzo, richiedendo un valore positivo
-                    double prezzo;
-                    do {
-                        System.out.print("Prezzo: ");
-                        prezzo = input.nextDouble();
-                        input.nextLine(); // Consuma newline rimasto
-                        if (prezzo <= 0) System.out.println("Il prezzo deve essere positivo!");
-                    } while (prezzo <= 0);
+                    double prezzo = Metodi.leggiNumPositivo(input, "Prezzo: ");
 
                     // Legge quantità e categoria
-                    System.out.print("Quantità: ");
-                    int quantita = input.nextInt();
-                    input.nextLine();
+                    int quantita = (int) Metodi.leggiNumPositivo(input, "Quantità: ");
 
                     System.out.print("Categoria: ");
                     String categoria = input.nextLine();
@@ -84,7 +76,7 @@ public class gestionale_spesa {
                 }    // Marca un articolo come acquistato
                 case 6 -> System.out.println(Metodi.calcolaTotale(listaArticoli));      // Calcola e mostra il totale spesa
                 case 7 -> {
-                    if(listaArticoli.size() == 0){
+                    if(Metodi.checkListaVuota(listaArticoli)){
                         System.out.println("La lista è vuota!");
                     } else {
                         System.out.println(Metodi.salvaSuFile(listaArticoli));
